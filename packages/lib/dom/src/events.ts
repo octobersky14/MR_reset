@@ -1,10 +1,12 @@
 import {isDefined, Nullable, Procedure, Subscription} from "@opendaw/lib-std"
 
+type KnownEventMap = WindowEventMap & MIDIInputEventMap & MIDIPortEventMap
+
 export class Events {
-    static subscribe<K extends keyof WindowEventMap>(eventTarget: EventTarget,
-                                                     type: K,
-                                                     listener: (ev: WindowEventMap[K]) => void,
-                                                     options?: boolean | AddEventListenerOptions): Subscription {
+    static subscribe<K extends keyof KnownEventMap>(eventTarget: EventTarget,
+                                                    type: K,
+                                                    listener: (ev: KnownEventMap[K]) => void,
+                                                    options?: boolean | AddEventListenerOptions): Subscription {
         eventTarget.addEventListener(type, listener as EventListener, options)
         return {terminate: () => eventTarget.removeEventListener(type, listener as EventListener, options)}
     }

@@ -88,7 +88,7 @@ export const Clip = ({lifecycle, service, project, adapter, gridColumn}: Constru
         if (notification.type === "sequencing") {
             const {started, stopped, obsolete} = notification.changes
             if (started.some(uuid => UUID.equals(uuid, adapter.uuid))) {
-                running.own(service.engine.position().subscribe(owner => updateProgress(owner.getValue())))
+                running.own(service.engine.position.subscribe(owner => updateProgress(owner.getValue())))
                 state.setValue(ClipState.Playing)
             } else if (
                 stopped.some(uuid => UUID.equals(uuid, adapter.uuid)) || obsolete.some(uuid => UUID.equals(uuid, adapter.uuid))) {

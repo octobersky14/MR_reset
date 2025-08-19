@@ -1,12 +1,12 @@
 import {ProgressHandler, SortedSet, UUID} from "@opendaw/lib-std"
-import {AudioData, SampleManager, SampleMetaData} from "@opendaw/studio-adapters"
+import {AudioData, SampleLoader, SampleManager, SampleMetaData} from "@opendaw/studio-adapters"
 import {MainThreadSampleLoader} from "./MainThreadSampleLoader"
 import {SampleProvider} from "./SampleProvider"
 
 export class MainThreadSampleManager implements SampleManager, SampleProvider {
     readonly #api: SampleProvider
     readonly #context: AudioContext
-    readonly #loaders: SortedSet<UUID.Format, MainThreadSampleLoader>
+    readonly #loaders: SortedSet<UUID.Format, SampleLoader>
 
     constructor(api: SampleProvider, context: AudioContext) {
         this.#api = api
@@ -22,7 +22,9 @@ export class MainThreadSampleManager implements SampleManager, SampleProvider {
 
     invalidate(uuid: UUID.Format) {this.#loaders.opt(uuid).ifSome(loader => loader.invalidate())}
 
-    getOrCreate(uuid: UUID.Format): MainThreadSampleLoader {
+    record(loader: SampleLoader): void {this.#loaders.add(loader)}
+
+    getOrCreate(uuid: UUID.Format): SampleLoader {
         return this.#loaders.getOrCreate(uuid, uuid => new MainThreadSampleLoader(this, uuid))
     }
 }

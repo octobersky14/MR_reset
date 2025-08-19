@@ -99,7 +99,7 @@ export const VolumeSlider = ({lifecycle, editing, parameter}: Construct) => {
         lines.forEach(line => {line.x2.baseVal.value = CssUtils.calc("50% - 0.0625em - 1px", clientWidth, em)})
         lineContainer.height.baseVal.value = CssUtils.calc("100% - 2em", clientHeight, em)
 
-        // attach new dragging function with updated options
+        // attach a new dragging function with updated options
         //
         const snapLength = 8
         const guideBounds = guide.getBoundingClientRect()

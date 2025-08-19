@@ -38,7 +38,6 @@ import {SessionService} from "./SessionService"
 import {StudioSignal} from "./StudioSignal"
 import {Projects} from "@/project/Projects"
 import {SampleDialogs} from "@/ui/browse/SampleDialogs"
-import {TextTooltip} from "@/ui/surface/TextTooltip"
 import {AudioOutputDevice} from "@/audio/AudioOutputDevice"
 import {FooterLabel} from "@/service/FooterLabel"
 import {RouteLocation} from "@opendaw/lib-jsx"
@@ -59,13 +58,13 @@ import {
     MainThreadSampleManager,
     Project,
     ProjectEnv,
+    Recording,
     Worklets
 } from "@opendaw/studio-core"
 import {AudioOfflineRenderer} from "@/audio/AudioOfflineRenderer"
 import {FilePickerAcceptTypes} from "@/ui/FilePickerAcceptTypes"
 import {Xml} from "@opendaw/lib-xml"
 import {MetaDataSchema} from "@opendaw/lib-dawproject"
-import DawprojectFileType = FilePickerAcceptTypes.DawprojectFileType
 
 /**
  * I am just piling stuff after stuff in here to boot the environment.
@@ -109,6 +108,7 @@ export class StudioService implements ProjectEnv {
     readonly panelLayout = new PanelContents(createPanelFactory(this))
     readonly spotlightDataSupplier = new SpotlightDataSupplier()
     readonly samplePlayback: SamplePlayback
+    // noinspection JSUnusedGlobalSymbols
     readonly _shortcuts = new Shortcuts(this) // TODO reference will be used later in a key-mapping configurator
     readonly engine = new EngineFacade()
     readonly recovery = new Recovery(this)
@@ -147,7 +147,7 @@ export class StudioService implements ProjectEnv {
                     {terminate: () => session.saveMidiConfiguration()}
                 )
                 range.showUnitInterval(0, PPQN.fromSignature(16, 1))
-                session.loadMidiConfiguration()
+                session.loadMidiConfiguration().then()
 
                 // -------------------------------
                 // Show views if content available
@@ -171,6 +171,7 @@ export class StudioService implements ProjectEnv {
                 this.#startAudioWorklet(lifeTime, project)
                 if (root) {this.switchScreen("default")}
             } else {
+                this.engine.releaseClient()
                 range.maxUnits = PPQN.fromSignature(128, 1)
                 range.showUnitInterval(0, PPQN.fromSignature(16, 1))
                 this.layout.screen.setValue("dashboard")
@@ -202,8 +203,6 @@ export class StudioService implements ProjectEnv {
             })
         }
 
-        this.spotlightDataSupplier.registerAction("Play", () => this.engine.isPlaying().setValue(true))
-        this.spotlightDataSupplier.registerAction("Stop", () => this.engine.isPlaying().setValue(false))
         this.spotlightDataSupplier.registerAction("Create Synth", EmptyExec)
         this.spotlightDataSupplier.registerAction("Create Drumcomputer", EmptyExec)
         this.spotlightDataSupplier.registerAction("Create ModularSystem", EmptyExec)
@@ -223,10 +222,7 @@ export class StudioService implements ProjectEnv {
         }
 
         configLocalStorageBoolean(this.layout.helpVisible, "help-visible",
-            visible => {
-                TextTooltip.enabled = visible
-                document.body.classList.toggle("help-hidden", !visible)
-            }, true)
+            visible => document.body.classList.toggle("help-hidden", !visible), true)
 
         this.recovery.restoreSession().then(optSession => {
             if (optSession.nonEmpty()) {
@@ -251,9 +247,7 @@ export class StudioService implements ProjectEnv {
             try {
                 await showApproveDialog({headline: "Closing Project?", message: "You will lose all progress!"})
             } catch (error) {
-                if (!Errors.isAbort(error)) {
-                    panic(String(error))
-                }
+                if (!Errors.isAbort(error)) {panic(String(error))}
                 return
             }
             this.sessionService.setValue(Option.None)
@@ -264,6 +258,24 @@ export class StudioService implements ProjectEnv {
         this.sessionService.setValue(Option.wrap(new ProjectSession(this,
             UUID.generate(), Project.new(this), ProjectMeta.init("Untitled"), Option.None)))
     }
+
+    startRecording(countIn: boolean): void {
+        if (!this.hasProjectSession) {return}
+        Recording.start({
+            sampleManager: this.sampleManager,
+            project: this.project,
+            worklets: this.worklets,
+            engine: this.engine,
+            requestMIDIAccess: MidiDeviceAccess.requestMidiAccess,
+            audioContext: this.context
+        }, countIn).catch(reason => {
+            console.debug(reason)
+            showInfoDialog({headline: "Could not start recording", message: String(reason)}).then()
+        })
+    }
+
+    stopRecording(): void {this.engine.stopRecording()}
+    isRecording(): boolean {return this.engine.isRecording.getValue()}
 
     async save(): Promise<void> {return this.sessionService.save()}
     async saveAs(): Promise<void> {return this.sessionService.saveAs()}
@@ -394,7 +406,8 @@ export class StudioService implements ProjectEnv {
         if (status === "rejected") {
             return showInfoDialog({headline: "Export Error", message: String(error)})
         } else {
-            const {status, error} = await Promises.tryCatch(Files.save(zip, {types: [DawprojectFileType]}))
+            const {status, error} = await Promises.tryCatch(Files.save(zip,
+                {types: [FilePickerAcceptTypes.DawprojectFileType]}))
             if (status === "rejected" && !Errors.isAbort(error)) {
                 return error
             } else {

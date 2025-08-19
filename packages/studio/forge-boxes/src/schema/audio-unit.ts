@@ -1,6 +1,43 @@
 import {AudioSendRouting, AudioUnitType, Pointers} from "@opendaw/studio-enums"
 import {DefaultParameterPointerRules} from "./defaults"
-import {BoxSchema} from "@opendaw/lib-box-forge"
+import {BoxSchema, FieldRecord, mergeFields, reserveMany} from "@opendaw/lib-box-forge"
+
+const CaptureAttributes = {
+    1: {type: "pointer", name: "audio-unit", pointerType: Pointers.AudioUnits, mandatory: true},
+    2: {type: "boolean", name: "armed"},
+    3: {type: "string", name: "device-id"},
+    4: {type: "string", name: "record-mode", value: "normal"}, // "normal" | "replace" | "punch"
+    ...reserveMany(5, 6, 7, 8, 9)
+} as const satisfies FieldRecord<Pointers>
+
+export const CaptureAudioBox: BoxSchema<Pointers> = {
+    type: "box",
+    class: {
+        name: "CaptureAudioBox",
+        fields: mergeFields(CaptureAttributes, {
+            10: {
+                type: "object", name: "monitor", class: {
+                    name: "CaptureAudioMonitor",
+                    fields: {
+                        1: {type: "string", name: "mode", value: "auto"}, // "off" | "on" | "auto"
+                        2: {type: "float32", name: "gain", value: 1.0},
+                        3: {type: "boolean", name: "mute"}
+                    }
+                }
+            }
+        })
+    }
+}
+
+export const CaptureMidiBox: BoxSchema<Pointers> = {
+    type: "box",
+    class: {
+        name: "CaptureMidiBox",
+        fields: mergeFields(CaptureAttributes, {
+            10: {type: "int32", name: "channel", value: -1} // -1 for all channels
+        })
+    }
+}
 
 export const AudioUnitBox: BoxSchema<Pointers> = {
     type: "box",

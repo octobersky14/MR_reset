@@ -1,8 +1,8 @@
 import {byte, Comparator, int, safeExecute} from "@opendaw/lib-std"
-import {Event} from "@/midi/format/Event"
-import {ControlType} from "@/midi/ControlType"
-import {ControlEventVisitor} from "@/midi/format/ControlEventVisitor"
-import {MidiFileDecoder} from "@/midi/format/MidiFileDecoder"
+import {Event} from "./Event"
+import {ControlType} from "./ControlType"
+import {ControlEventVisitor} from "./ControlEventVisitor"
+import {MidiFileDecoder} from "./MidiFileDecoder"
 
 export class ControlEvent implements Event<ControlType> {
     static readonly Comparator: Comparator<ControlEvent> = (a, b) => a.ticks - b.ticks
@@ -22,7 +22,7 @@ export class ControlEvent implements Event<ControlType> {
                 return new ControlEvent(ticks, type, decoder.readByte(), 0)
         }
         {
-            // else ignore message
+            // else ignore the message
             let c: int
             do {
                 c = decoder.readByte() & 0xff

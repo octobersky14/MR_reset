@@ -25,8 +25,13 @@ export class Shortcuts {
                 await service.browse()
             } else if (code === "Space") {
                 event.preventDefault()
-                const playing = service.engine.isPlaying()
-                playing.setValue(!playing.getValue())
+                const engine = service.engine
+                const isPlaying = engine.isPlaying.getValue()
+                if (isPlaying) {
+                    engine.stop()
+                } else {
+                    engine.play()
+                }
             } else if (code === "KeyE") {
                 service.panelLayout.getByType(PanelType.ContentEditor).toggleMinimize()
             } else if (code === "KeyB") {

@@ -50,14 +50,14 @@ export const ClipsHeader = ({lifecycle, service}: Construct) => {
                         .forEach(unit => unit.tracks.values()
                             .forEach(track => track.clips.collection.getAdapterByIndex(index)
                                 .ifSome(clip => {if (!clip.mute) {clipsIds.push(clip.uuid)}})))
-                    engine.scheduleClipPlay(...clipsIds)
+                    engine.scheduleClipPlay(clipsIds)
                 }),
                 Events.subscribe(stopIcon, "pointerdown", () => {
                     const trackIds: Array<UUID.Format> = []
                     rootBoxAdapter.audioUnits.adapters()
                         .forEach(unit => unit.tracks.values()
                             .forEach(track => trackIds.push(track.uuid)))
-                    engine.scheduleClipStop(...trackIds)
+                    engine.scheduleClipStop(trackIds)
                 }),
                 TextTooltip.default(playIcon, () => "Schedule column to play"),
                 TextTooltip.default(stopIcon, () => "Schedule column to stop")

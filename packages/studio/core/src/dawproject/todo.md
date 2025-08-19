@@ -22,7 +22,7 @@
 
 * ~~Map to new uuids (not when exporting)~~
 * ~~Create the openDAW device if found~~
-      * ~~Read preset~~
+  * ~~Read preset~~
 * Create automation
 * Read event-offset and import loop settings
 * ~~Auto-select the first audio-unit~~

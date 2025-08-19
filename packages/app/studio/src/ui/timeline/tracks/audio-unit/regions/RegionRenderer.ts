@@ -1,13 +1,11 @@
 import {int, Option, quantizeFloor, unitValue} from "@opendaw/lib-std"
 import {LoopableRegion, PPQN, ValueEvent} from "@opendaw/lib-dsp"
-import {AudioRegionBoxAdapter} from "@opendaw/studio-adapters"
-import {NoteRegionBoxAdapter} from "@opendaw/studio-adapters"
+import {AudioRegionBoxAdapter, NoteRegionBoxAdapter, ValueRegionBoxAdapter} from "@opendaw/studio-adapters"
 import {
     RegionModifyStrategies,
     RegionModifyStrategy
 } from "@/ui/timeline/tracks/audio-unit/regions/RegionModifyStrategies.ts"
 import {TracksManager} from "@/ui/timeline/tracks/audio-unit/TracksManager.ts"
-import {ValueRegionBoxAdapter} from "@opendaw/studio-adapters"
 import {renderNotes} from "@/ui/timeline/renderer/notes.ts"
 import {RegionBound, RegionColors} from "@/ui/timeline/renderer/env.ts"
 import {renderAudio} from "@/ui/timeline/renderer/audio.ts"
@@ -125,6 +123,13 @@ export const renderRegions = (context: CanvasRenderingContext2D,
                             context.fillRect(x, labelHeight, 1, height - labelHeight)
                         }
                         renderAudio(context, range, region.file, region.gain, bound, colors, pass)
+                    }
+                    // TODO Record indicator (necessary?)
+                    if (region.file.getOrCreateLoader().state.type === "record") {
+                        /* context.strokeStyle = `hsl(${0.0}, ${normSat}%, 45%)`
+                         context.beginPath()
+                         context.rect(x0Int + dpr, dpr, xnInt - 2 * dpr, height - 2 * dpr)
+                         context.stroke()*/
                     }
                 },
                 visitValueRegionBoxAdapter: (region: ValueRegionBoxAdapter) => {

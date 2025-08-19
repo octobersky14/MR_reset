@@ -14,12 +14,12 @@ import {
 } from "@opendaw/lib-std"
 import {AudioUnitBoxAdapter, AutomatableParameterFieldAdapter} from "@opendaw/studio-adapters"
 import {MidiDeviceAccess} from "@/midi/devices/MidiDeviceAccess"
-import {MidiData} from "@/midi/MidiData"
 import {MidiDialogs} from "@/midi/devices/MidiDialogs"
 import {Address, AddressJSON, PrimitiveField, PrimitiveValues} from "@opendaw/lib-box"
 import {Pointers} from "@opendaw/studio-enums"
 import {StudioService} from "@/service/StudioService"
 import {Engine, Project} from "@opendaw/studio-core"
+import {MidiData} from "@opendaw/lib-midi"
 
 export type MIDIConnectionJSON = ({ type: "key" } | { type: "control", controlId: byte })
     & { address: AddressJSON, channel: byte }

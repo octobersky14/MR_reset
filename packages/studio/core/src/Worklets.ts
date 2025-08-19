@@ -31,11 +31,11 @@ export class Worklets {
         return new EngineWorklet(this.#context, project, exportConfiguration)
     }
 
-    createRecording(numberOfChannels: int, numChunks: int): RecordingWorklet {
+    createRecording(numberOfChannels: int, numChunks: int, outputLatency: number): RecordingWorklet {
         const audioBytes = numberOfChannels * numChunks * RenderQuantum * Float32Array.BYTES_PER_ELEMENT
         const pointerBytes = Int32Array.BYTES_PER_ELEMENT * 2
         const sab = new SharedArrayBuffer(audioBytes + pointerBytes)
         const buffer: RingBuffer.Config = {sab, numChunks, numberOfChannels, bufferSize: RenderQuantum}
-        return new RecordingWorklet(this.#context, buffer)
+        return new RecordingWorklet(this.#context, buffer, outputLatency)
     }
 }

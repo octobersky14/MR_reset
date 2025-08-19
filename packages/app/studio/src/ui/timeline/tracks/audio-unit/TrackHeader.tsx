@@ -31,7 +31,7 @@ export const TrackHeader = ({lifecycle, service, trackBoxAdapter, audioUnitBoxAd
             if (owner.getValue() === 0) {
                 replaceChildren(channelStrip, (
                     <AudioUnitChannelControls lifecycle={lifecycle}
-                                              editing={project.editing}
+                                              project={project}
                                               midiDevices={service.midiLearning}
                                               adapter={audioUnitBoxAdapter}/>
                 ))

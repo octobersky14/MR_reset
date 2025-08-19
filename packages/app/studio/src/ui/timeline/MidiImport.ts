@@ -1,4 +1,3 @@
-import {MidiFile} from "@/midi/format/MidiFile"
 import {
     Arrays,
     byte,
@@ -15,10 +14,10 @@ import {NoteEventBox, NoteEventCollectionBox, NoteRegionBox, TrackBox} from "@op
 import {AudioUnitBoxAdapter, TrackType} from "@opendaw/studio-adapters"
 import {PPQN, ppqn} from "@opendaw/lib-dsp"
 import {showInfoDialog, showProcessDialog} from "@/ui/components/dialogs.tsx"
-import {ControlType} from "@/midi/ControlType"
 import {Promises, Wait} from "@opendaw/lib-runtime"
 import {Errors, Files} from "@opendaw/lib-dom"
 import {ColorCodes, Project} from "@opendaw/studio-core"
+import {ControlType, MidiFile} from "@opendaw/lib-midi"
 
 export namespace MidiImport {
     export const toTracks = async (project: Project, audioUnitBoxAdapter: AudioUnitBoxAdapter) => {

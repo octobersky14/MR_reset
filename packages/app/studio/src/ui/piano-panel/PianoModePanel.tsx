@@ -75,7 +75,7 @@ export const PianoModePanel = ({lifecycle, service}: Construct) => {
     }
     subscribeExcludePianoMode()
     lifecycle.ownAll(
-        service.engine.position().subscribe(notify.request),
+        service.engine.position.subscribe(notify.request),
         pianoMode.subscribe(notify.request),
         excludePianoModeSubscription
     )

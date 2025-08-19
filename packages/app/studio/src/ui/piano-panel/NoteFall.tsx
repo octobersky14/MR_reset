@@ -26,7 +26,7 @@ type RenderCall = {
 }
 
 export const NoteFall = ({lifecycle, service, updateNotifier}: Construct) => {
-    const enginePosition = service.engine.position()
+    const enginePosition = service.engine.position
     const {project} = service
     const pianoMode = project.rootBoxAdapter.pianoMode
     const {keyboard, timeRangeInQuarters, noteScale, noteLabels, transpose} = pianoMode
@@ -135,7 +135,7 @@ export const NoteFall = ({lifecycle, service, updateNotifier}: Construct) => {
         Events.subscribe(canvas, "wheel", event => {
             event.preventDefault()
             const position = enginePosition.getValue() - Math.sign(event.deltaY) * PPQN.SemiQuaver * 2
-            service.engine.requestPosition(Math.max(0, position))
+            service.engine.setPosition(Math.max(0, position))
         })
     )
     return element

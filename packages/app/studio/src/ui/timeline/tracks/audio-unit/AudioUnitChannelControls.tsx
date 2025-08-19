@@ -6,30 +6,29 @@ import {Knob} from "@/ui/components/Knob.tsx"
 import {Checkbox} from "@/ui/components/Checkbox.tsx"
 import {Icon} from "@/ui/components/Icon.tsx"
 import {createElement} from "@opendaw/lib-jsx"
-import {Editing} from "@opendaw/lib-box"
 import {EditWrapper} from "@/ui/wrapper/EditWrapper.ts"
-import {IconSymbol} from "@opendaw/studio-adapters"
+import {AudioUnitBoxAdapter, IconSymbol} from "@opendaw/studio-adapters"
 import {attachParameterContextMenu} from "@/ui/menu/automation.ts"
-import {AudioUnitBoxAdapter} from "@opendaw/studio-adapters"
 import {ControlIndicator} from "@/ui/components/ControlIndicator"
 import {Html} from "@opendaw/lib-dom"
 import {MIDILearning} from "@/midi/devices/MIDILearning"
-import {Colors} from "@opendaw/studio-core"
+import {Colors, Project} from "@opendaw/studio-core"
 
 const className = Html.adoptStyleSheet(css, "AudioUnitChannelControls")
 
 type Construct = {
     lifecycle: Lifecycle
-    editing: Editing
+    project: Project
     midiDevices: MIDILearning
     adapter: AudioUnitBoxAdapter
 }
 
-export const AudioUnitChannelControls = ({lifecycle, editing, midiDevices, adapter}: Construct) => {
+export const AudioUnitChannelControls = ({lifecycle, project, midiDevices, adapter}: Construct) => {
     const {volume, panning, mute, solo} = adapter.namedParameter
+    const {editing, captureManager} = project
     const volumeControl = (
         <RelativeUnitValueDragging lifecycle={lifecycle}
-                                   editing={editing}
+                                   editing={project.editing}
                                    parameter={volume}
                                    options={SnapCommonDecibel}>
             <ControlIndicator lifecycle={lifecycle} parameter={volume}>
@@ -81,6 +80,12 @@ export const AudioUnitChannelControls = ({lifecycle, editing, midiDevices, adapt
                 {muteControl}
                 {soloControl}
             </div>
+            <Checkbox lifecycle={lifecycle}
+                      model={captureManager.getObservableArmedState(adapter.address.uuid)}
+                      style={{fontSize: "0.75em"}}
+                      appearance={{activeColor: Colors.red, landscape: false}}>
+                <Icon symbol={IconSymbol.Record}/>
+            </Checkbox>
         </div>
     )
 }

@@ -19,7 +19,8 @@ type Construct = {
 }
 
 export const Timeline = ({lifecycle, service}: Construct) => {
-    const {snapping, clips, followPlaybackCursor, primaryVisible} = service.timeline
+    const {timeline, engine} = service
+    const {snapping, clips, followPlaybackCursor, primaryVisible} = timeline
     const snappingName = Inject.value(snapping.unit.name)
     lifecycle.own(snapping.subscribe(snapping => {snappingName.value = snapping.unit.name}))
     const timelineHeader = <TimelineHeader lifecycle={lifecycle} service={service}/>
@@ -34,6 +35,8 @@ export const Timeline = ({lifecycle, service}: Construct) => {
             {tracksFooter}
         </div>
     )
+    const updateRecordingState = () =>
+        element.classList.toggle("recording", engine.isRecording.getValue() || engine.isCountingIn.getValue())
     lifecycle.ownAll(
         Html.watchResize(element, () => {
             const cursorHeight = element.clientHeight
@@ -41,7 +44,9 @@ export const Timeline = ({lifecycle, service}: Construct) => {
                 - tracksFooter.clientHeight
             element.style.setProperty("--cursor-height", `${cursorHeight - 1}px`)
         }),
-        service.engine.position().subscribe((() => {
+        engine.isRecording.subscribe(updateRecordingState),
+        engine.isCountingIn.subscribe(updateRecordingState),
+        engine.position.subscribe((() => {
             let lastPosition: ppqn = 0
             return owner => {
                 if (!followPlaybackCursor.getValue()) {return}

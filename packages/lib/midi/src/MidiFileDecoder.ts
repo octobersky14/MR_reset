@@ -1,5 +1,5 @@
 import {byte, ByteArrayInput, int} from "@opendaw/lib-std"
-import {MidiFileFormat} from "@/midi/format/MidiFileFormat"
+import {MidiFileFormat} from "./MidiFileFormat"
 import {Chunk} from "./Chunk"
 import {MidiTrack} from "./MidiTrack"
 

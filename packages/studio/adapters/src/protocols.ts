@@ -1,15 +1,16 @@
-import {ppqn} from "@opendaw/lib-dsp"
 import {byte, int, Nullable, Terminable, unitValue, UUID} from "@opendaw/lib-std"
+import {ppqn} from "@opendaw/lib-dsp"
 import {AudioData} from "./audio/AudioData"
-import { ClipSequencingUpdates } from "./ClipNotifications"
+import {ClipSequencingUpdates} from "./ClipNotifications"
 
 export interface EngineCommands extends Terminable {
-    setPlaying(value: boolean): void
-    setRecording(value: boolean): void
+    play(): void
+    stop(reset: boolean): void
     setPosition(position: ppqn): void
+    startRecording(countIn: boolean): void
+    stopRecording(): void
+
     setMetronomeEnabled(enabled: boolean): void
-    // full stop and clear all buffers
-    stopAndReset(): void
     queryLoadingComplete(): Promise<boolean>
     // throws a test error while processing audio
     panic(): void

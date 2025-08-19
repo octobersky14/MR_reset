@@ -23,7 +23,7 @@ import {Dragging, Html} from "@opendaw/lib-dom"
 import {FlexSpacer} from "@/ui/components/FlexSpacer.tsx"
 import {Propagation} from "@opendaw/lib-box"
 
-const className = Html.adoptStyleSheet(css, "time-display")
+const className = Html.adoptStyleSheet(css, "TimeStateDisplay")
 
 type Construct = {
     lifecycle: Lifecycle
@@ -52,12 +52,14 @@ export const TimeStateDisplay = ({lifecycle, service}: Construct) => {
         if (optSession.isEmpty()) {return}
         const {project} = optSession.unwrap()
         const {timelineBoxAdapter, rootBoxAdapter, boxGraph} = project
-        projectActiveLifeTime.own(service.engine.position().catchupAndSubscribe((owner: ObservableValue<number>) => {
-            const {bars, beats, semiquavers, ticks} = PPQN.toParts(owner.getValue())
+        projectActiveLifeTime.own(service.engine.position.catchupAndSubscribe((owner: ObservableValue<number>) => {
+            const position = owner.getValue()
+            const {bars, beats, semiquavers, ticks} = PPQN.toParts(Math.abs(position))
             barDigits.value = (bars + 1).toString().padStart(3, "0")
             beatDigit.value = (beats + 1).toString()
             semiquaverDigit.value = (semiquavers + 1).toString()
             ticksDigit.value = ticks.toString().padStart(3, "0")
+            timeUnitElements.forEach((element) => element.classList.toggle("negative", position < 0))
         }))
         timelineBoxAdapter.box.bpm.catchupAndSubscribe((owner: ObservableValue<float>) =>
             bpmDigit.value = owner.getValue().toFixed(0).padStart(3, "0"))
@@ -70,6 +72,26 @@ export const TimeStateDisplay = ({lifecycle, service}: Construct) => {
         rootBoxAdapter.groove.box.amount.catchupAndSubscribe((owner: ObservableValue<float>) =>
             shuffleDigit.value = String(Math.round(owner.getValue() * 100)))
     }
+    const timeUnitElements: ReadonlyArray<HTMLElement> = (
+        <Frag>
+            <div className="number-display">
+                <div>{barDigits}</div>
+                <div>BAR</div>
+            </div>
+            <div className="number-display">
+                <div>{beatDigit}</div>
+                <div>BEAT</div>
+            </div>
+            <div className="number-display">
+                <div>{semiquaverDigit}</div>
+                <div>SEMI</div>
+            </div>
+            <div className="number-display">
+                <div>{ticksDigit}</div>
+                <div>TICKS</div>
+            </div>
+        </Frag>
+    )
     lifecycle.own(sessionService.catchupAndSubscribe(sessionObserver))
     const bpmDisplay: HTMLElement = (
         <div className="number-display">
@@ -92,26 +114,6 @@ export const TimeStateDisplay = ({lifecycle, service}: Construct) => {
             })
         }
     })))
-    const timeUnitElements: ReadonlyArray<HTMLElement> = (
-        <Frag>
-            <div className="number-display">
-                <div>{barDigits}</div>
-                <div>BAR</div>
-            </div>
-            <div className="number-display">
-                <div>{beatDigit}</div>
-                <div>BEAT</div>
-            </div>
-            <div className="number-display">
-                <div>{semiquaverDigit}</div>
-                <div>SEMI</div>
-            </div>
-            <div className="number-display">
-                <div>{ticksDigit}</div>
-                <div>TICKS</div>
-            </div>
-        </Frag>
-    )
     lifecycle.own(timeUnitIndex.catchupAndSubscribe(owner =>
         timeUnitElements.forEach((element, index) => element.classList.toggle("hidden", index > owner.getValue()))))
     const element: HTMLElement = (

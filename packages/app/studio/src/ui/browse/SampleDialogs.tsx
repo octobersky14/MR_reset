@@ -71,7 +71,7 @@ export namespace SampleDialogs {
     }
 
     export const showEditSampleDialog = async (sample: Sample): Promise<Sample> => {
-        if (sample.cloud) {
+        if (isDefined(sample.cloud)) {
             return Promise.reject("Cannot change sample from the cloud")
         }
         const {resolve, reject, promise} = Promise.withResolvers<Sample>()

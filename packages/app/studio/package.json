@@ -17,6 +17,7 @@
     "@opendaw/lib-jsx": "^0.0.19",
     "@opendaw/lib-runtime": "^0.0.19",
     "@opendaw/lib-std": "^0.0.19",
+    "@opendaw/lib-midi": "^0.0.0",
     "@opendaw/studio-adapters": "^0.0.19",
     "@opendaw/studio-boxes": "^0.0.19",
     "@opendaw/studio-core": "^0.0.19",

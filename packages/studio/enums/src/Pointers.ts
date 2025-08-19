@@ -6,6 +6,7 @@ export enum Pointers {
     AudioConnection,
     InstrumentHost,
     AudioOutput,
+    Capture,
     NotesConnection,
     VoltageConnection,
     AudioUnits,

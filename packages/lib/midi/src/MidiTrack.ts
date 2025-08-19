@@ -1,10 +1,9 @@
-import {Channel} from "@/midi/Channel"
-import {ControlEvent} from "@/midi/format/ControlEvent"
-import {MetaEvent, MetaType} from "@/midi/format/MetaType"
 import {ArrayMultimap, ByteArrayOutput, int, isDefined} from "@opendaw/lib-std"
+import {Channel} from "./Channel"
+import {ControlEvent} from "./ControlEvent"
+import {MetaEvent, MetaType} from "./MetaType"
 import {MidiFileDecoder} from "./MidiFileDecoder"
-import {EventCollection, EventSpan, NoteEvent, ppqn, PPQN} from "@opendaw/lib-dsp"
-import {ControlType} from "../ControlType"
+import {ControlType} from "./ControlType"
 
 export class MidiTrack {
     static decode(decoder: MidiFileDecoder): MidiTrack {
@@ -49,18 +48,8 @@ export class MidiTrack {
 
     static createEmpty(): MidiTrack {return new MidiTrack(new ArrayMultimap<Channel, ControlEvent>(), [])}
 
-    static fromCollection<E extends NoteEvent>(collection: EventCollection<E>): MidiTrack {
-        const events: Array<ControlEvent> = []
-        const toTicks = (position: ppqn, timeDivision: int = 96): int => Math.floor(position / PPQN.Quarter * timeDivision)
-        for (const event of collection.asArray()) {
-            events.push(new ControlEvent(toTicks(event.position), ControlType.NOTE_ON, event.pitch, Math.round(event.velocity * 127)))
-            events.push(new ControlEvent(toTicks(EventSpan.complete(event)), ControlType.NOTE_OFF, event.pitch, 0))
-        }
-        return new MidiTrack(new ArrayMultimap<Channel, ControlEvent>([[0, events]], ControlEvent.Comparator), [])
-    }
-
-    private constructor(readonly controlEvents: ArrayMultimap<Channel, ControlEvent>,
-                        readonly metaEvents: Array<MetaEvent>) {}
+    constructor(readonly controlEvents: ArrayMultimap<Channel, ControlEvent>,
+                readonly metaEvents: Array<MetaEvent>) {}
 
     encode(): ArrayBufferLike {
         const output = ByteArrayOutput.create()

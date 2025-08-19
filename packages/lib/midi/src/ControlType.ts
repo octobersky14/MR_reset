@@ -1,4 +1,4 @@
-export const enum ControlType {
+export enum ControlType {
     NOTE_ON = 0x90,
     NOTE_OFF = 0x80,
     NOTE_AFTER_TOUCH = 0xa0,

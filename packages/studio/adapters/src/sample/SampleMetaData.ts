@@ -3,5 +3,5 @@ export type SampleMetaData = {
     bpm: number
     duration: number
     sample_rate: number
-    cloud?: boolean
+    cloud?: string
 }

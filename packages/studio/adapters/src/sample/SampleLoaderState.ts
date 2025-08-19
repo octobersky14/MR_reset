@@ -1,7 +1,8 @@
 import {unitValue} from "@opendaw/lib-std"
 
 export type SampleLoaderState =
-    | { type: "idle" }
-    | { type: "progress", progress: unitValue }
-    | { type: "error", reason: string }
-    | { type: "loaded" }
+    | { readonly type: "idle" }
+    | { readonly type: "record" }
+    | { readonly type: "progress", progress: unitValue }
+    | { readonly type: "error", readonly reason: string }
+    | { readonly type: "loaded" }

@@ -2,11 +2,15 @@ export * from "./sync-log/Commit"
 export * from "./sync-log/SyncLogReader"
 export * from "./sync-log/SyncLogWriter"
 
-export * from "./samples/SamplePeaks"
 export * from "./samples/SampleStorage"
 export * from "./samples/MainThreadSampleLoader"
 export * from "./samples/MainThreadSampleManager"
 export * from "./samples/SampleProvider"
+
+export * from "./capture/Capture"
+export * from "./capture/CaptureManager"
+export * from "./capture/Recording"
+export * from "./capture/RecordingContext"
 
 export * from "./dawproject/DawProject"
 export * from "./dawproject/DawProjectExporter"

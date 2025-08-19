@@ -1,6 +1,13 @@
 import {assert, Bits, isInstanceOf, Option, UUID} from "@opendaw/lib-std"
 import {LoopableRegion} from "@opendaw/lib-dsp"
-import {AudioClipBoxAdapter, AudioData, AudioRegionBoxAdapter, TapeDeviceBoxAdapter, TrackType} from "@opendaw/studio-adapters"
+import {
+    AudioClipBoxAdapter,
+    AudioData,
+    AudioRegionBoxAdapter,
+    SampleLoader,
+    TapeDeviceBoxAdapter,
+    TrackType
+} from "@opendaw/studio-adapters"
 import {RenderQuantum} from "../../constants"
 import {EngineContext} from "../../EngineContext"
 import {AudioGenerator, Block, BlockFlag, ProcessInfo, Processor} from "../../processing"
@@ -55,7 +62,8 @@ export class TapeDeviceProcessor extends AbstractProcessor implements DeviceProc
                             none: () => {
                                 for (const region of trackBoxAdapter.regions.collection.iterateRange(p0, p1)) {
                                     if (region.mute || !isInstanceOf(region, AudioRegionBoxAdapter)) {continue}
-                                    const optData = region.file.getOrCreateLoader().data
+                                    const loader: SampleLoader = region.file.getOrCreateLoader()
+                                    const optData = loader.data
                                     if (optData.isEmpty()) {return}
                                     const data = optData.unwrap()
                                     for (const cycle of LoopableRegion.locateLoops(region, p0, p1)) {

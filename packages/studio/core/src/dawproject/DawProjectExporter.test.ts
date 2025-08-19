@@ -18,6 +18,9 @@ describe("DawProjectExport", () => {
         const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
         const project = Project.load({
             sampleManager: new class implements SampleManager {
+                record(loader: SampleLoader & { uuid: UUID.Format }): void {
+                    throw new Error("Method not implemented.")
+                }
                 getOrCreate(format: UUID.Format): SampleLoader {
                     return new class implements SampleLoader {
                         data: Option<AudioData> = Option.None
@@ -25,6 +28,7 @@ describe("DawProjectExport", () => {
                         uuid: UUID.Format = format
                         state: SampleLoaderState = {type: "progress", progress: 0.0}
                         meta: Option<any> = Option.None
+                        invalidate(): void {throw new Error("Method not implemented.")}
                         subscribe(_observer: Observer<SampleLoaderState>): Subscription {
                             return Terminable.Empty
                         }

@@ -25,7 +25,7 @@ export namespace SampleApi {
         const sample: Sample = await Promises.retry(() => network.limitFetch(url, headers)
             .then(x => x.json()))
             .then(x => {if ("error" in x) {return panic(x.error)} else {return x}})
-        return Object.freeze({...sample, cloud: true})
+        return Object.freeze({...sample, cloud: FileRoot})
     }
 
     export const load = async (context: AudioContext,

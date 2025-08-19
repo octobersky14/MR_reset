@@ -33,7 +33,7 @@ export interface TimeAxisCursorMapper {
 export const TimeAxis = ({lifecycle, service, snapping, range, mapper}: Construct) => {
     let endMarkerPosition: Nullable<ppqn> = null
     const {project: {timelineBox: {signature, durationInPulses}, editing, boxGraph}} = service
-    const position = service.engine.position()
+    const position = service.engine.position
     const canvas: HTMLCanvasElement = <canvas/>
     const painter = lifecycle.own(new CanvasPainter(canvas, ({context}) => {
         const {height} = canvas
@@ -58,7 +58,7 @@ export const TimeAxis = ({lifecycle, service, snapping, range, mapper}: Construc
                     context.fillRect(x, height * 0.5, 1, height * 0.5)
                 }
             })
-        const pulse = service.engine.playbackTimestamp().getValue()
+        const pulse = service.engine.playbackTimestamp.getValue()
         const x = Math.floor(range.unitToX(pulse) * devicePixelRatio)
         context.fillStyle = "rgba(255, 255, 255, 0.25)"
         context.fillRect(x, 0, devicePixelRatio, height)
@@ -66,8 +66,9 @@ export const TimeAxis = ({lifecycle, service, snapping, range, mapper}: Construc
     const cursorElement: HTMLDivElement = <div className="cursor" data-component="cursor"/>
     const updateCursor = () => {
         const pulses = isDefined(mapper) ? mapper.mapPlaybackCursor(position.getValue()) : position.getValue()
-        cursorElement.style.left = `${Math.floor(range.unitToX(pulses))}px`
-        cursorElement.style.visibility = range.unitMin <= pulses && pulses < range.unitMax ? "visible" : "hidden"
+        const x = Math.floor(range.unitToX(pulses))
+        cursorElement.style.left = `${x}px`
+        cursorElement.style.visibility = 0 < x && x < range.width ? "visible" : "hidden"
     }
     const endMarkerElement: HTMLDivElement = <div className="end-marker" data-component="end-marker"/>
     const updateEndMarker = () => {
@@ -91,7 +92,7 @@ export const TimeAxis = ({lifecycle, service, snapping, range, mapper}: Construc
             update: (event: Dragging.Event) => {
                 const x = event.clientX - canvas.getBoundingClientRect().left
                 const p = Math.max(0, range.xToUnit(x))
-                service.engine.requestPosition(snapping.round(p))
+                service.engine.setPosition(snapping.round(p))
                 if (p < range.unitMin) {
                     range.moveToUnit(p)
                 } else if (p > range.unitMax) {
@@ -116,7 +117,7 @@ export const TimeAxis = ({lifecycle, service, snapping, range, mapper}: Construc
         }, {passive: false}),
         Html.watchResize(canvas, onResize),
         range.subscribe(painter.requestUpdate),
-        service.engine.playbackTimestamp().subscribe(painter.requestUpdate),
+        service.engine.playbackTimestamp.subscribe(painter.requestUpdate),
         boxGraph.subscribeVertexUpdates(Propagation.Children, signature.address, painter.requestUpdate)
     )
     return (

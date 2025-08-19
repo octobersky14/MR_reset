@@ -1,11 +1,11 @@
 import {Arrays, float, Float16, FloatArray, int, panic, Procedure} from "@opendaw/lib-std"
 import {Communicator, Messenger, stopwatch} from "@opendaw/lib-runtime"
-import {Peaks} from "./Peaks"
-import {PeakProtocol} from "./PeakProtocol"
+import {Peaks, SamplePeaks} from "./Peaks"
+import {SamplePeakProtocol} from "./SamplePeakProtocol"
 
-export namespace PeakWorker {
+export namespace SamplePeakWorker {
     export const install = (messenger: Messenger) =>
-        Communicator.executor(messenger.channel("peaks"), new class implements PeakProtocol {
+        Communicator.executor(messenger.channel("peaks"), new class implements SamplePeakProtocol {
             async generateAsync(progress: Procedure<number>,
                                 shifts: Uint8Array,
                                 frames: FloatArray[],
@@ -19,7 +19,7 @@ export namespace PeakWorker {
                            shifts: Uint8Array,
                            frames: ReadonlyArray<FloatArray>,
                            numFrames: int,
-                           numChannels: int): Peaks => {
+                           numChannels: int): SamplePeaks => {
         if (frames.length !== numChannels) {
             return panic(`Invalid numberOfChannels. Expected: ${numChannels}. Got ${frames.length}`)
         }
@@ -34,7 +34,7 @@ export namespace PeakWorker {
         const numShifts = shifts.length
         const [stages, dataOffset] = initStages(shifts, numFrames)
         const data: Int32Array[] = Arrays.create(() => new Int32Array(dataOffset), numChannels)
-        const minMask = stages[0].mask
+        const minMask = (1 << stages[0].shift) - 1
         const total = numChannels * numFrames
         let count = 0
         for (let channel = 0; channel < numChannels; ++channel) {
@@ -54,7 +54,7 @@ export namespace PeakWorker {
                         const state = states[j]
                         state.min = Math.min(state.min, min)
                         state.max = Math.max(state.max, max)
-                        if ((stage.mask & position) === 0) {
+                        if ((((1 << stage.shift) - 1) & position) === 0) {
                             channelData[stage.dataOffset + state.index++] = pack(state.min, state.max)
                             state.min = Number.POSITIVE_INFINITY
                             state.max = Number.NEGATIVE_INFINITY
@@ -69,8 +69,8 @@ export namespace PeakWorker {
             }
         }
         progress(1.0)
-        time.lab(`Peak-Gen '${self.constructor.name}'`)
-        return new Peaks(stages, data, numFrames, numChannels)
+        time.lab(`SamplePeaks '${self.constructor.name}'`)
+        return new SamplePeaks(stages, data, numFrames, numChannels)
     }
 
     const initStages = (shifts: Uint8Array, numFrames: int): [Peaks.Stage[], int] => {
@@ -78,14 +78,14 @@ export namespace PeakWorker {
         const stages = Arrays.create((index: int) => {
             const shift = shifts[index]
             const numPeaks = Math.ceil(numFrames / (1 << shift))
-            const stage = new Peaks.Stage((1 << shift) - 1, shift, numPeaks, dataOffset)
+            const stage = new Peaks.Stage(shift, numPeaks, dataOffset)
             dataOffset += numPeaks
             return stage
         }, shifts.length)
         return [stages, dataOffset]
     }
 
-    const pack = (f0: float, f1: float): int => {
+    export const pack = (f0: float, f1: float): int => {
         const bits0 = Float16.floatToIntBits(f0)
         const bits1 = Float16.floatToIntBits(f1)
         return bits0 | (bits1 << 16)

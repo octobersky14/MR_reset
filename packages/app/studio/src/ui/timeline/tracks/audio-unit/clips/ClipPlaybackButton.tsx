@@ -24,9 +24,9 @@ export const ClipPlaybackButton = ({lifecycle, service, adapter, state}: Constru
              ondblclick={event => event.stopPropagation()}
              onclick={() => {
                  if (state.getValue() !== ClipState.Idle) {
-                     service.engine.scheduleClipStop(adapter.trackBoxAdapter.unwrap().uuid)
+                     service.engine.scheduleClipStop([adapter.trackBoxAdapter.unwrap().uuid])
                  } else if (!adapter.box.mute.getValue()) {
-                     service.engine.scheduleClipPlay(adapter.uuid)
+                     service.engine.scheduleClipPlay([adapter.uuid])
                  }
              }}>
             <IconCartridge lifecycle={lifecycle}

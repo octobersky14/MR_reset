@@ -1,17 +1,17 @@
 import {byte, isDefined, isInstanceOf, Nullable, Observer, Subscription} from "@opendaw/lib-std"
 import {Events} from "@opendaw/lib-dom"
-import {MidiData} from "@/midi/MidiData"
+import {MidiData} from "@opendaw/lib-midi"
 
 export class MIDIMessageSubscriber {
     static subscribeMessageEvents(access: MIDIAccess, observer: Observer<MIDIMessageEvent>, channel?: byte): Subscription {
         const listen = (input: MIDIInput) => isDefined(channel)
-            ? Events.subscribeAny(input, "midimessage", (event: MIDIMessageEvent) => {
+            ? Events.subscribe(input, "midimessage", (event: MIDIMessageEvent) => {
                 if (event.data === null || MidiData.readChannel(event.data) !== channel) {return}
                 observer(event)
-            }) : Events.subscribeAny(input, "midimessage", observer)
+            }) : Events.subscribe(input, "midimessage", observer)
         const connections: Array<[MIDIInput, Subscription]> = Array.from(access.inputs.values())
             .map(input => ([input, listen(input)]))
-        const stateSubscription = Events.subscribeAny(access, "statechange", (event: MIDIConnectionEvent) => {
+        const stateSubscription = Events.subscribe(access, "statechange", (event: MIDIConnectionEvent) => {
             const port: Nullable<MIDIPort> = event.port
             if (!isInstanceOf(port, MIDIInput)) {return}
             for (const [input, subscription] of connections) {

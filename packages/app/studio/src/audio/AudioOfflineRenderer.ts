@@ -27,7 +27,7 @@ export namespace AudioOfflineRenderer {
         const durationInSeconds = numSamples / sampleRate
         const worklets = await Worklets.install(context, WorkletsUrl)
         const engineWorklet = worklets.createEngine(project, optExportConfiguration.unwrapOrUndefined())
-        engineWorklet.isPlaying().setValue(true)
+        engineWorklet.play()
         engineWorklet.connect(context.destination)
         await engineWorklet.isReady()
         while (!await engineWorklet.queryLoadingComplete()) {await Wait.timeSpan(TimeSpan.seconds(1))}

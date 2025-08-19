@@ -1,5 +1,5 @@
 import {FloatArray, int, Lazy, Option, Procedure} from "@opendaw/lib-std"
-import type {OpfsProtocol, PeakProtocol} from "@opendaw/lib-fusion"
+import type {OpfsProtocol, SamplePeakProtocol} from "@opendaw/lib-fusion"
 import {Entry} from "@opendaw/lib-fusion"
 import {Communicator, Messenger} from "@opendaw/lib-runtime"
 
@@ -12,10 +12,10 @@ export class WorkerAgents {
     static messenger: Option<Messenger> = Option.None
 
     @Lazy
-    static get Peak(): PeakProtocol {
+    static get Peak(): SamplePeakProtocol {
         return Communicator
-            .sender<PeakProtocol>(this.messenger.unwrap("WorkerAgents are not installed").channel("peaks"),
-                router => new class implements PeakProtocol {
+            .sender<SamplePeakProtocol>(this.messenger.unwrap("WorkerAgents are not installed").channel("peaks"),
+                router => new class implements SamplePeakProtocol {
                     async generateAsync(
                         progress: Procedure<number>,
                         shifts: Uint8Array,

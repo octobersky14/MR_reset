@@ -23,35 +23,29 @@ type Construct = {
     appearance?: Appearance
 }
 
-export const ButtonCheckboxRadio = ({
-                                        lifecycle,
-                                        dataClass,
-                                        style,
-                                        className: externalClassName,
-                                        appearance
-                                    }: Construct, children: JsxValue) => {
+export const ButtonCheckboxRadio = ({lifecycle, dataClass, style, className: externalClassName, appearance}: Construct,
+                                    children: JsxValue) => {
     const wrapper: HTMLElement = (
-        <div
-            className={Html.buildClassList(className,
-                appearance?.framed && "framed",
-                appearance?.landscape && "landscape",
-                externalClassName)}
-            data-class={dataClass}
-            onpointerdown={(event: PointerEvent) => {
-                self.getSelection()?.removeAllRanges()
-                event.preventDefault()
-                event.stopPropagation()
-            }}>
+        <div className={Html.buildClassList(className,
+            appearance?.framed && "framed",
+            appearance?.landscape && "landscape",
+            externalClassName)}
+             data-class={dataClass}
+             onpointerdown={(event: PointerEvent) => {
+                 self.getSelection()?.removeAllRanges()
+                 event.preventDefault()
+                 event.stopPropagation()
+             }}>
             {children}
         </div>
     )
 
     if (appearance?.tooltip) {
         lifecycle.own(TextTooltip.simple(wrapper, () => {
-            const clientRect = wrapper.getBoundingClientRect()
+            const {left, bottom} = wrapper.getBoundingClientRect()
             return {
-                clientX: clientRect.left,
-                clientY: clientRect.bottom + 8,
+                clientX: left,
+                clientY: bottom + 8,
                 text: appearance.tooltip ?? ""
             }
         }))

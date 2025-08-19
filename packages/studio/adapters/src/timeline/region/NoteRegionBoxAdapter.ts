@@ -97,11 +97,11 @@ export class NoteRegionBoxAdapter implements LoopableRegionBoxAdapter<NoteEventC
     get isSelected(): boolean {return this.#isSelected}
 
     * iterateActiveNotesAt(position: ppqn): Generator<NoteEvent> {
-        const optContent = this.optCollection
-        if (optContent.isEmpty()) {return}
-        const content = optContent.unwrap()
+        const optCollection = this.optCollection
+        if (optCollection.isEmpty()) {return}
+        const collection = optCollection.unwrap()
         const local = LoopableRegion.globalToLocal(this, position)
-        for (const event of content.events.iterateFrom(local - content.maxDuration)) {
+        for (const event of collection.events.iterateFrom(local - collection.maxDuration)) {
             if (local < event.position) { return }
             if (local < event.complete) {
                 yield event.copyAsNoteEvent()

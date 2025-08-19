@@ -30,7 +30,6 @@ export namespace TerminatorUtils {
                     entry[1].terminate()
                     weakRefs.splice(index, 1)
                     if (weakRefs.length === 0) {
-                        console.debug("stop weak watching")
                         clearInterval(id)
                     }
                 }

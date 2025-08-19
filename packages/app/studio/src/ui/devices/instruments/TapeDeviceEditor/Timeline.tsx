@@ -18,7 +18,7 @@ export const Timeline = ({lifecycle, service, tracks}: Construct) => {
     const unitMin = -PPQN.Quarter * 12
     const unitMax = PPQN.Quarter * 12
     const mapping = (unit: number) => (unit - unitMin) / (unitMax - unitMin)
-    const positionValue = service.engine.position()
+    const positionValue = service.engine.position
     const redraw = deferNextFrame(() => {
         const {width, height} = canvas
         const position = positionValue.getValue()

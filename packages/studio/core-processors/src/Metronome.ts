@@ -1,19 +1,20 @@
 import {BlockFlag, ProcessInfo} from "./processing"
-import {PPQN} from "@opendaw/lib-dsp"
+import {Fragmentor, PPQN} from "@opendaw/lib-dsp"
 import {assert, Bits, int, TAU} from "@opendaw/lib-std"
 import {RenderQuantum} from "./constants"
 import {AudioBuffer} from "./AudioBuffer"
-import {Fragmentor} from "@opendaw/lib-dsp"
+import {TimeInfo} from "./TimeInfo"
 
 export class Metronome {
+    readonly #timeInfo: TimeInfo
     readonly #output = new AudioBuffer()
     readonly #clicks: Click[] = []
 
-    constructor() {}
+    constructor(timeInfo: TimeInfo) {this.#timeInfo = timeInfo}
 
     process({blocks}: ProcessInfo): void {
         blocks.forEach(({p0, p1, bpm, s0, s1, flags}) => {
-            if (Bits.every(flags, BlockFlag.transporting)) {
+            if (this.#timeInfo.metronomeEnabled && Bits.every(flags, BlockFlag.transporting)) {
                 for (const position of Fragmentor.iterate(p0, p1, PPQN.Quarter)) {
                     assert(p0 <= position && position < p1, `${position} out of bounds (${p0}, ${p1})`)
                     const distanceToEvent = Math.floor(PPQN.pulsesToSamples(position - p0, bpm, sampleRate))
@@ -49,7 +50,6 @@ class Click {
         const [l, r] = buffer.channels()
         const attack = Math.floor(0.002 * sampleRate)
         const release = Math.floor(0.050 * sampleRate)
-
         for (let index = Math.max(this.#startIndex, start); index < end; index++) {
             const env = Math.min(this.#position / attack, 1.0 - (this.#position - attack) / release)
             const amp = Math.sin(this.#position / sampleRate * TAU * this.#frequency) * 0.25 * env * env

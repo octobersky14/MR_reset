@@ -1,5 +1,5 @@
 import {Peaks} from "@opendaw/lib-fusion"
-import {AudioData, SampleLoader, SampleManager, SampleLoaderState, EngineToClient} from "@opendaw/studio-adapters"
+import {AudioData, EngineToClient, SampleLoader, SampleLoaderState, SampleManager} from "@opendaw/studio-adapters"
 import {Observer, Option, SortedSet, Subscription, Terminable, UUID} from "@opendaw/lib-std"
 
 class AudioLoaderWorklet implements SampleLoader {
@@ -16,6 +16,9 @@ class AudioLoaderWorklet implements SampleLoader {
     get state(): SampleLoaderState {return this.#state}
 
     subscribe(_observer: Observer<SampleLoaderState>): Subscription {return Terminable.Empty}
+    invalidate(): void {}
+
+    toString(): string {return `{AudioLoaderWorklet}`}
 }
 
 export class AudioManagerWorklet implements SampleManager {
@@ -26,6 +29,8 @@ export class AudioManagerWorklet implements SampleManager {
         this.#engineToClient = engineToClient
         this.#set = UUID.newSet<SampleLoader>(handler => handler.uuid)
     }
+
+    record(_loader: SampleLoader): void {}
 
     getOrCreate(uuid: UUID.Format): SampleLoader {
         return this.#set.getOrCreate(uuid, uuid => new AudioLoaderWorklet(uuid, this.#engineToClient))

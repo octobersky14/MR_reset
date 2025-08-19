@@ -1,5 +1,5 @@
 import {CanvasPainter} from "@/ui/canvas/painter.ts"
-import {int, Procedure, TAU} from "@opendaw/lib-std"
+import {int, Nullable, Procedure, TAU} from "@opendaw/lib-std"
 import {AudioClipBoxAdapter} from "@opendaw/studio-adapters"
 import {Peaks} from "@opendaw/lib-fusion"
 import {dbToGain} from "@opendaw/lib-dsp"
@@ -12,11 +12,11 @@ export const createAudioClipPainter = (adapter: AudioClipBoxAdapter): Procedure<
     const numRays = 256 // TODO We should make this dependent on the size
     const peaks = file.peaks.unwrap()
     const unitsEachPixel = peaks.numFrames / numRays
-    const stage = peaks.nearest(unitsEachPixel)
+    const stage: Nullable<Peaks.Stage> = peaks.nearest(unitsEachPixel)
     if (stage === null) {return}
     const unitsEachPeak = stage.unitsEachPeak()
     const peaksEachRay = unitsEachPixel / unitsEachPeak
-    const data: Int32Array = peaks.data[0]
+    const data: Int32Array = peaks.data[0] // TODO Left channel only?
     const scale = dbToGain(gain)
     context.save()
     context.translate(radius, radius)
@@ -28,7 +28,6 @@ export const createAudioClipPainter = (adapter: AudioClipBoxAdapter): Procedure<
     let indexFrom: int = 0 | 0
     let min: number = 0.0
     let max: number = 0.0
-
     for (let i = 0; i < numRays; i++) {
         const to = from + peaksEachRay
         const indexTo = Math.floor(to)

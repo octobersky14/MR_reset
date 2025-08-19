@@ -8,5 +8,6 @@ export interface SampleLoader {
     readonly peaks: Option<Peaks>
     readonly uuid: UUID.Format
     readonly state: SampleLoaderState
+    invalidate(): void
     subscribe(observer: Observer<SampleLoaderState>): Subscription
 }

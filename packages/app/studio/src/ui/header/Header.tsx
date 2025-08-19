@@ -77,7 +77,7 @@ export const Header = ({lifecycle, service}: Construct) => {
             }
             <hr/>
             <Checkbox lifecycle={lifecycle}
-                      model={service.engine.metronomeEnabled()}
+                      model={service.engine.metronomeEnabled}
                       appearance={{activeColor: Colors.orange, tooltip: "Metronome"}}>
                 <Icon symbol={IconSymbol.Metronome}/>
             </Checkbox>

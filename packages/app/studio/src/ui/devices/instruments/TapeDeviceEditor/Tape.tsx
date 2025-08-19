@@ -41,7 +41,7 @@ export const Tape = ({lifecycle, service, tracks}: Construct) => {
         <rect x={100} y={106} width={8} height={2} stroke="none"/>
     )
     const tape: ReadonlyArray<SVGLineElement> = Arrays.create(() => <line stroke={stroke}/>, 3)
-    const position = service.engine.position()
+    const position = service.engine.position
     const headerUpdater = deferNextFrame(() => {
         const pulse = position.getValue()
         const playingRegion = tracks.collection.adapters().some(track => {

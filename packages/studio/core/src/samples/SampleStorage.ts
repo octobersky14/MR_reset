@@ -1,11 +1,10 @@
 import {Arrays, ByteArrayInput, EmptyExec, UUID} from "@opendaw/lib-std"
-import {Peaks} from "@opendaw/lib-fusion"
+import {Peaks, SamplePeaks} from "@opendaw/lib-fusion"
 import {AudioData, Sample, SampleMetaData} from "@opendaw/studio-adapters"
 import {WorkerAgents} from "../WorkerAgents"
 import {encodeWavFloat} from "../Wav"
 
 export namespace SampleStorage {
-    // CAUTION! Next time you would kill all locally imported files, so it is not that easy!
     export const clean = () => WorkerAgents.Opfs.delete("samples/v1").catch(EmptyExec)
 
     export const Folder = "samples/v2"
@@ -37,7 +36,7 @@ export namespace SampleStorage {
             WorkerAgents.Opfs.read(`${path}/audio.wav`)
                 .then(bytes => context.decodeAudioData(bytes.buffer as ArrayBuffer)),
             WorkerAgents.Opfs.read(`${path}/peaks.bin`)
-                .then(bytes => Peaks.from(new ByteArrayInput(bytes.buffer))),
+                .then(bytes => SamplePeaks.from(new ByteArrayInput(bytes.buffer))),
             WorkerAgents.Opfs.read(`${path}/meta.json`)
                 .then(bytes => JSON.parse(new TextDecoder().decode(bytes)))
         ]).then(([buffer, peaks, meta]) => [{

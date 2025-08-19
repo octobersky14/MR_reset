@@ -8,15 +8,16 @@ import {
     ObservableValue,
     Observer,
     Option,
+    Provider,
     Subscription,
     Terminable,
     Terminator
 } from "@opendaw/lib-std"
 import {showInfoDialog} from "@/ui/components/dialogs"
-import {MidiData} from "@/midi/MidiData"
 import {RouteLocation} from "@opendaw/lib-jsx"
 import {AnimationFrame, Browser, ConsoleCommands} from "@opendaw/lib-dom"
 import {MIDIMessageSubscriber} from "@/midi/devices/MIDIMessageSubscriber"
+import {MidiData} from "@opendaw/lib-midi"
 
 export class MidiDeviceAccess {
     static get(): Option<MidiDeviceAccess> {return this.#instance}
@@ -42,7 +43,6 @@ export class MidiDeviceAccess {
 
     @Lazy
     static available(): MutableObservableValue<boolean> {
-        const notifier = new Notifier<ObservableValue<boolean>>()
         return new class implements MutableObservableValue<boolean> {
             setValue(value: boolean): void {
                 if (this.getValue()) {return}
@@ -69,7 +69,7 @@ export class MidiDeviceAccess {
                             })
                             .finally(() => {
                                 MidiDeviceAccess.#isRequesting = Option.None
-                                AnimationFrame.once(() => notifier.notify(this)) // This helps prevent Firefox from freezing
+                                AnimationFrame.once(() => MidiDeviceAccess.#notifier.notify(this)) // This helps prevent Firefox from freezing
                             })
                         return Option.wrap(promise)
                     })()
@@ -80,13 +80,35 @@ export class MidiDeviceAccess {
                     }).then()
                 }
             }
-            getValue(): boolean {return MidiDeviceAccess.#instance.nonEmpty() || MidiDeviceAccess.#isRequesting.nonEmpty()}
-            subscribe(observer: Observer<ObservableValue<boolean>>): Subscription {return notifier.subscribe(observer)}
+
+            getValue(): boolean {
+                return MidiDeviceAccess.#instance.nonEmpty() || MidiDeviceAccess.#isRequesting.nonEmpty()
+            }
+
+            subscribe(observer: Observer<ObservableValue<boolean>>): Subscription {
+                return MidiDeviceAccess.#notifier.subscribe(observer)
+            }
+
             catchupAndSubscribe(observer: Observer<ObservableValue<boolean>>): Subscription {
                 observer(this)
                 return this.subscribe(observer)
             }
         }
+    }
+
+    static readonly #notifier: Notifier<ObservableValue<boolean>> = new Notifier<ObservableValue<boolean>>()
+
+    static readonly requestMidiAccess: Provider<Promise<MIDIAccess>> = () => {
+        return this.get().match({
+            none: async () => navigator
+                .requestMIDIAccess({sysex: false})
+                .then(access => {
+                    MidiDeviceAccess.#instance = Option.wrap(new MidiDeviceAccess(access))
+                    MidiDeviceAccess.#notifier.notify(this.available())
+                    return access
+                }),
+            some: async instance => instance.access
+        })
     }
 
     static subscribeMessageEvents(observer: Observer<MIDIMessageEvent>, channel?: byte): Subscription {
@@ -119,6 +141,8 @@ export class MidiDeviceAccess {
                 return listen
             })
     }
+
+    get access(): MIDIAccess {return this.#access}
 
     subscribeMessageEvents(observer: Observer<MIDIMessageEvent>, channel?: byte): Subscription {
         return MIDIMessageSubscriber.subscribeMessageEvents(this.#access, observer, channel)
